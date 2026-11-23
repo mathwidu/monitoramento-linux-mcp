@@ -1,0 +1,7 @@
+services:
+  monitoramento:
+    build: .
+    environment:
+      HOST_MCP: 0.0.0.0
+    ports:
+      - "127.0.0.1:9000:9000"

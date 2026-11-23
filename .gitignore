@@ -1,0 +1,12 @@
+__pycache__/
+.venv/
+.env
+.DS_Store
+/entrega/
+/estudo/
+
+# graphify-standard:start
+/graphify-out/
+/.graphify/*
+!/.graphify/config.json
+# graphify-standard:end
