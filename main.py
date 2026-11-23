@@ -3,53 +3,57 @@ import platform
 import shutil
 
 from fastmcp import FastMCP
+from mcp.types import ToolAnnotations
 
 from metricas_linux import contar_processos, identificar_processador, ler_ram_disponivel_mib
 
 
 BYTES_POR_GIB = 1024 ** 3
 mcp = FastMCP("Monitoramento Linux")
+SOMENTE_LEITURA = ToolAnnotations(
+    readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False
+)
 
 
-@mcp.tool(name="cpuName")
+@mcp.tool(name="cpuName", annotations=SOMENTE_LEITURA)
 def nome_processador() -> str:
     """Retorna a identificação do processador disponível no Linux."""
     return identificar_processador()
 
 
-@mcp.tool(name="availableRoot")
+@mcp.tool(name="availableRoot", annotations=SOMENTE_LEITURA)
 def espaco_disponivel_raiz() -> dict:
     """Retorna o espaço disponível no sistema de arquivos raiz (/) em GiB."""
     espaco = shutil.disk_usage("/").free
     return {"valor": round(espaco / BYTES_POR_GIB, 2), "unidade": "GiB"}
 
 
-@mcp.tool(name="sizeRoot")
+@mcp.tool(name="sizeRoot", annotations=SOMENTE_LEITURA)
 def capacidade_raiz() -> dict:
     """Retorna a capacidade total do sistema de arquivos raiz (/) em GiB."""
     capacidade = shutil.disk_usage("/").total
     return {"valor": round(capacidade / BYTES_POR_GIB, 2), "unidade": "GiB"}
 
 
-@mcp.tool(name="kernelVersion")
+@mcp.tool(name="kernelVersion", annotations=SOMENTE_LEITURA)
 def versao_kernel() -> str:
     """Retorna a versão do kernel Linux em execução."""
     return platform.release()
 
 
-@mcp.tool(name="availableRAM")
+@mcp.tool(name="availableRAM", annotations=SOMENTE_LEITURA)
 def ram_disponivel() -> dict:
     """Retorna a estimativa de RAM disponível no Linux em MiB."""
     return {"valor": ler_ram_disponivel_mib(), "unidade": "MiB"}
 
 
-@mcp.tool(name="tasks")
+@mcp.tool(name="tasks", annotations=SOMENTE_LEITURA)
 def quantidade_processos() -> int:
     """Retorna o total de processos visíveis ao servidor, em qualquer estado."""
     return contar_processos()
 
 
-@mcp.tool(name="systemLoad")
+@mcp.tool(name="systemLoad", annotations=SOMENTE_LEITURA)
 def carga_media() -> dict:
     """Retorna a carga média do Linux nos últimos 1, 5 e 15 minutos."""
     carga_1_min, carga_5_min, carga_15_min = os.getloadavg()
