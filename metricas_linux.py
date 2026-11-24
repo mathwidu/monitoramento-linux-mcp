@@ -7,7 +7,7 @@ from pathlib import Path
 PROC = Path("/proc")
 
 
-def identificar_processador():
+def identificar_processador() -> str:
     # O locale fixo mantém os nomes dos campos do lscpu em inglês.
     comando = subprocess.run(
         ["lscpu", "--json", "--hierarchic=never"],
@@ -17,10 +17,8 @@ def identificar_processador():
         check=True,
         timeout=5,
     )
-    campos = {
-        item["field"].rstrip(":"): item["data"]
-        for item in json.loads(comando.stdout)["lscpu"]
-    }
+    linhas = json.loads(comando.stdout)["lscpu"]
+    campos = {item["field"].rstrip(":"): item["data"] for item in linhas}
     modelo = campos.get("Model name")
     if modelo and modelo != "-":
         return modelo
@@ -31,7 +29,7 @@ def identificar_processador():
     return f"{fabricante} ({arquitetura}) — modelo não informado pelo Linux"
 
 
-def ler_ram_disponivel_mib():
+def ler_ram_disponivel_mib() -> float:
     for linha in (PROC / "meminfo").read_text().splitlines():
         if linha.startswith("MemAvailable:"):
             # O Linux lista esse campo em kB de 1024 bytes.
@@ -40,6 +38,6 @@ def ler_ram_disponivel_mib():
     raise RuntimeError("O Linux não informou MemAvailable em /proc/meminfo.")
 
 
-def contar_processos():
+def contar_processos() -> int:
     # Cada diretório numérico em /proc representa um PID visível ao servidor.
     return sum(1 for entrada in PROC.iterdir() if entrada.name.isdecimal())
